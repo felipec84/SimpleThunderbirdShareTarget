@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "SimpleShareTarget (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "SimpleShareTarget (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
