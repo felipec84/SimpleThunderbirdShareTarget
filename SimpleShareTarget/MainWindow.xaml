@@ -33,5 +33,15 @@
             HorizontalAlignment="Center"
             VerticalAlignment="Top"
             Margin="20"/>
+        <TextBlock 
+            Grid.Row="2"
+            x:Name="ThunderbirdTextBlock"
+            Text="Thunderbird location..."
+            FontSize="20"
+            FontWeight="Bold"
+            Foreground="RoyalBlue"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Bottom"
+            Margin="20"/>
     </Grid>
 </Window>

@@ -1,14 +1,52 @@
 ﻿using Microsoft.UI.Xaml;
 using Microsoft.Windows.AppLifecycle;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using Windows.ApplicationModel.Activation;
+using Windows.Storage;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
 namespace SimpleShareTarget
 {
+    public static class ThunderbirdPathProvider
+    {
+        private const string IniFileName = "thunderbird.ini";
+        private const string Key = "Path";
+        private const string DefaultThunderbirdPath = @"C:\Program Files\Mozilla Thunderbird\thunderbird.exe";
+
+        public static async System.Threading.Tasks.Task<string> GetThunderbirdPathAsync()
+        {
+            var folder = Windows.ApplicationModel.Package.Current.InstalledLocation;
+            var iniFile = await folder.TryGetItemAsync(IniFileName) as StorageFile;
+            if (iniFile == null)
+            {
+                string defaultContent = $"{Key}={DefaultThunderbirdPath}";
+                iniFile = await folder.CreateFileAsync(
+                    IniFileName,
+                    CreationCollisionOption.ReplaceExisting
+                );
+                await FileIO.WriteTextAsync(iniFile, defaultContent);
+                return DefaultThunderbirdPath;
+            }
+
+
+            var lines = await File.ReadAllLinesAsync(iniFile.Path);
+            foreach (var line in lines)
+            {
+                if (line.StartsWith(Key + "=", System.StringComparison.OrdinalIgnoreCase))
+                {
+                    return line.Substring(Key.Length + 1).Trim();
+                }
+            }
+            return null;
+        }
+    }
+
     /// <summary>
     /// Provides application-specific behavior to supplement the default Application class.
     /// </summary>
@@ -53,15 +91,48 @@ namespace SimpleShareTarget
                         {
                             // Asynchronously get the list of shared files.
                             var storageItems = await dataPackageView.GetStorageItemsAsync();
+                            var filePaths = new List<string>();
+                            foreach (var item in storageItems.OfType<StorageFile>())
+                            {
+                                filePaths.Add(item.Path);
+                            }
+                            // Read Thunderbird path from .ini
+                            var thunderbirdPath = await ThunderbirdPathProvider.GetThunderbirdPathAsync();
+
+                            if (string.IsNullOrEmpty(thunderbirdPath) || !File.Exists(thunderbirdPath))
+                            {
+                                if (m_window is MainWindow mainWindow)
+                                {
+                                    var folder = Windows.ApplicationModel.Package.Current.InstalledLocation;
+                                    mainWindow.ShowThunderbirdPath($"Thunderbird path not found, ini searched on {folder.Path}.");
+                                }
+                            }
+                            else
+                            {
+                                if (m_window is MainWindow mainWindow)
+                                {
+                                    mainWindow.ShowThunderbirdPath(thunderbirdPath);
+                                }
+                            }
+
+                            var argsList = string.Join(" ", filePaths.Select(f => $"\"{f}\""));
+                            var psi = new ProcessStartInfo
+                            {
+                                FileName = thunderbirdPath,
+                                Arguments = $"-compose \"attachment='{argsList}'\"",
+                                UseShellExecute = true
+                            };
+                            Process.Start(psi);
+
                             var firstFile = storageItems.FirstOrDefault();
 
-                            if (firstFile != null)
+                            if (argsList != null)
                             {
                                 // We have the file! Pass its name to our main window.
                                 // We cast the generic Window to our specific MainWindow type.
                                 if (m_window is MainWindow mainWindow)
                                 {
-                                    mainWindow.ShowSharedFileName(firstFile.Name);
+                                    mainWindow.ShowSharedFileName(argsList);
                                 }
                             }
                         }
