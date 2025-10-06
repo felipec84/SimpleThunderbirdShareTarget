@@ -72,8 +72,6 @@ namespace SimpleShareTarget
         /// <param name="args">Details about the launch request and process.</param>
         protected override async void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
-            m_window = new MainWindow();
-
             // This is the modern way to get activation arguments in WinUI 3.
             var activatedArgs = AppInstance.GetCurrent().GetActivatedEventArgs();
 
@@ -104,18 +102,14 @@ namespace SimpleShareTarget
 
                             if (string.IsNullOrEmpty(thunderbirdPath) || !File.Exists(thunderbirdPath))
                             {
+                                m_window = new MainWindow();
+                                var folder = Windows.ApplicationModel.Package.Current.InstalledLocation;
                                 if (m_window is MainWindow mainWindow)
                                 {
-                                    var folder = Windows.ApplicationModel.Package.Current.InstalledLocation;
                                     mainWindow.ShowThunderbirdPath($"Thunderbird path not found, ini searched on {folder.Path}.");
                                 }
-                            }
-                            else
-                            {
-                                if (m_window is MainWindow mainWindow)
-                                {
-                                    mainWindow.ShowThunderbirdPath(thunderbirdPath);
-                                }
+                                m_window.Activate();
+                                return;
                             }
 
                             var argsList = string.Join(" ", filePaths.Select(f => $"\"{f}\""));
@@ -126,31 +120,25 @@ namespace SimpleShareTarget
                                 UseShellExecute = true
                             };
                             Process.Start(psi);
-
-                            if (argsList != null)
-                            {
-                                // We have the file! Pass its name to our main window.
-                                // We cast the generic Window to our specific MainWindow type.
-                                if (m_window is MainWindow mainWindow)
-                                {
-                                    mainWindow.ShowSharedFileName(argsList);
-                                }
-                            }
                         }
                         catch (Exception ex)
                         {
-                            // Handle potential errors, e.g., access denied.
-                            // For this simple app, we can just show the error message.
+                            m_window = new MainWindow();
                             if (m_window is MainWindow mainWindow)
                             {
                                 mainWindow.ShowSharedFileName($"Error: {ex.Message}");
                             }
+                            m_window.Activate();
+                            return;
                         }
                     }
                 }
+            } else
+            {
+                // Only show the window for normal launches (not share target)
+                m_window = new MainWindow();
+                m_window.Activate();
             }
-
-            m_window.Activate();
         }
     }
 }

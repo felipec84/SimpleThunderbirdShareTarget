@@ -11,7 +11,7 @@
   <Identity
     Name="7a598b7a-5c09-438c-bb1d-d57db94e37b7"
     Publisher="CN=felipec84"
-    Version="1.0.2.0" />
+    Version="1.0.3.0" />
 
   <mp:PhoneIdentity PhoneProductId="7a598b7a-5c09-438c-bb1d-d57db94e37b7" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
