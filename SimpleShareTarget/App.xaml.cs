@@ -1,20 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using Microsoft.UI.Xaml;
+using Microsoft.Windows.AppLifecycle;
+using System;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
-using Microsoft.UI.Xaml.Shapes;
-using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -26,7 +14,7 @@ namespace SimpleShareTarget
     /// </summary>
     public partial class App : Application
     {
-        private Window? _window;
+        private Window? m_window;
 
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
@@ -41,10 +29,56 @@ namespace SimpleShareTarget
         /// Invoked when the application is launched.
         /// </summary>
         /// <param name="args">Details about the launch request and process.</param>
-        protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
+        protected override async void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
-            _window = new MainWindow();
-            _window.Activate();
+            m_window = new MainWindow();
+
+            // This is the modern way to get activation arguments in WinUI 3.
+            var activatedArgs = AppInstance.GetCurrent().GetActivatedEventArgs();
+
+            // Check if the activation kind is ShareTarget.
+            if (activatedArgs.Kind == ExtendedActivationKind.ShareTarget)
+            {
+                // Cast the arguments to the specific type for share targets.
+                var shareArgs = activatedArgs.Data as ShareTargetActivatedEventArgs;
+                if (shareArgs != null)
+                {
+                    // The ShareOperation contains the data being shared.
+                    var dataPackageView = shareArgs.ShareOperation.Data;
+
+                    // Check if the shared data contains files (StorageItems).
+                    if (dataPackageView.Contains(Windows.ApplicationModel.DataTransfer.StandardDataFormats.StorageItems))
+                    {
+                        try
+                        {
+                            // Asynchronously get the list of shared files.
+                            var storageItems = await dataPackageView.GetStorageItemsAsync();
+                            var firstFile = storageItems.FirstOrDefault();
+
+                            if (firstFile != null)
+                            {
+                                // We have the file! Pass its name to our main window.
+                                // We cast the generic Window to our specific MainWindow type.
+                                if (m_window is MainWindow mainWindow)
+                                {
+                                    mainWindow.ShowSharedFileName(firstFile.Name);
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            // Handle potential errors, e.g., access denied.
+                            // For this simple app, we can just show the error message.
+                            if (m_window is MainWindow mainWindow)
+                            {
+                                mainWindow.ShowSharedFileName($"Error: {ex.Message}");
+                            }
+                        }
+                    }
+                }
+            }
+
+            m_window.Activate();
         }
     }
 }

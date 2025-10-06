@@ -26,6 +26,16 @@ namespace SimpleShareTarget
         public MainWindow()
         {
             InitializeComponent();
+            Title = "Simple Share Target";
+        }
+        /// <summary>
+        /// Public method that allows other parts of the app (like App.xaml.cs)
+        /// to update the TextBlock in this window.
+        /// </summary>
+        /// <param name="fileName">The name of the file to display.</param>
+        public void ShowSharedFileName(string fileName)
+        {
+            FileNameTextBlock.Text = $"Received File: {fileName}";
         }
     }
 }
