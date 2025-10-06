@@ -21,6 +21,9 @@ namespace SimpleShareTarget
 
         public static async System.Threading.Tasks.Task<string> GetThunderbirdPathAsync()
         {
+            return DefaultThunderbirdPath;
+            //TODO: For now, we just return the default path, there seems to be error in the .ini location 
+            //when running as a packed app.
             var folder = Windows.ApplicationModel.Package.Current.InstalledLocation;
             var iniFile = await folder.TryGetItemAsync(IniFileName) as StorageFile;
             if (iniFile == null)
@@ -123,8 +126,6 @@ namespace SimpleShareTarget
                                 UseShellExecute = true
                             };
                             Process.Start(psi);
-
-                            var firstFile = storageItems.FirstOrDefault();
 
                             if (argsList != null)
                             {
