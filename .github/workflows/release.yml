@@ -14,18 +14,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup NuGet
-        uses: NuGet/setup-nuget@v2
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x' # Specify your project's .NET version
 
-      - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v2
-
-      - name: Restore NuGet packages
-        run: nuget restore SimpleThunderbirdShareTarget.sln
-
-      - name: Build the application
+      - name: Publish the application
         run: |
-          msbuild SimpleThunderbirdShareTarget.sln /p:Configuration=Release /p:Platform=x64 /p:RuntimeIdentifier=win-x64 /p:AppxPackageDir=".\AppxPackages\\" /p:UapAppxPackageBuildMode=Sideloading /p:AppxPackageSigningEnabled=false
+          dotnet publish SimpleThunderbirdShareTarget.sln -c Release -r win-x64 --self-contained false -p:AppxPackageDir=".\AppxPackages\\" -p:UapAppxPackageBuildMode=Sideloading -p:AppxPackageSigningEnabled=false
 
       - name: Get package name
         id: package
