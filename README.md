@@ -1,4 +1,4 @@
-# SimpleShareTarget
+# SimpleThunderbirdShareTarget
 
 
 ## To allow instalation
