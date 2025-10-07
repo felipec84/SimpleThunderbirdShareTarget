@@ -30,10 +30,14 @@ jobs:
       - name: Get package name
         id: package
         run: |
-          $msixPath = (Get-ChildItem -Path ".\AppxPackages" -Filter "*.msix" -Recurse).FullName
-          $msixName = (Get-ChildItem -Path ".\AppxPackages" -Filter "*.msix" -Recurse).Name
-          echo "path=$msixPath" >> $env:GITHUB_OUTPUT
-          echo "name=$msixName" >> $env:GITHUB_OUTPUT
+          $msixFile = Get-ChildItem -Path ".\AppxPackages" -Filter "*.msix" -Recurse | Select-Object -First 1
+          if ($null -eq $msixFile) {
+            Write-Error "MSIX file not found in .\AppxPackages"
+            exit 1
+          }
+          echo "Found MSIX package: $($msixFile.FullName)"
+          echo "path=$($msixFile.FullName)" >> $env:GITHUB_OUTPUT
+          echo "name=$($msixFile.Name)" >> $env:GITHUB_OUTPUT
 
       - name: Create GitHub Release
         id: create_release
