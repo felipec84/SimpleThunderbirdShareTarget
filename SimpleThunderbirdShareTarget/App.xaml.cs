@@ -15,38 +15,11 @@ namespace SimpleThunderbirdShareTarget
 {
     public static class ThunderbirdPathProvider
     {
-        private const string IniFileName = "thunderbird.ini";
-        private const string Key = "Path";
         private const string DefaultThunderbirdPath = @"C:\Program Files\Mozilla Thunderbird\thunderbird.exe";
 
-        public static async System.Threading.Tasks.Task<string> GetThunderbirdPathAsync()
+        public static string GetThunderbirdPath()
         {
             return DefaultThunderbirdPath;
-            //TODO: For now, we just return the default path, there seems to be error in the .ini location 
-            //when running as a packed app.
-            var folder = Windows.ApplicationModel.Package.Current.InstalledLocation;
-            var iniFile = await folder.TryGetItemAsync(IniFileName) as StorageFile;
-            if (iniFile == null)
-            {
-                string defaultContent = $"{Key}={DefaultThunderbirdPath}";
-                iniFile = await folder.CreateFileAsync(
-                    IniFileName,
-                    CreationCollisionOption.ReplaceExisting
-                );
-                await FileIO.WriteTextAsync(iniFile, defaultContent);
-                return DefaultThunderbirdPath;
-            }
-
-
-            var lines = await File.ReadAllLinesAsync(iniFile.Path);
-            foreach (var line in lines)
-            {
-                if (line.StartsWith(Key + "=", System.StringComparison.OrdinalIgnoreCase))
-                {
-                    return line.Substring(Key.Length + 1).Trim();
-                }
-            }
-            return null;
         }
     }
 
@@ -98,15 +71,14 @@ namespace SimpleThunderbirdShareTarget
                                 filePaths.Add(item.Path);
                             }
                             // Read Thunderbird path from .ini
-                            var thunderbirdPath = await ThunderbirdPathProvider.GetThunderbirdPathAsync();
+                            var thunderbirdPath = ThunderbirdPathProvider.GetThunderbirdPath();
 
                             if (string.IsNullOrEmpty(thunderbirdPath) || !File.Exists(thunderbirdPath))
                             {
                                 m_window = new MainWindow();
-                                var folder = Windows.ApplicationModel.Package.Current.InstalledLocation;
                                 if (m_window is MainWindow mainWindow)
                                 {
-                                    mainWindow.ShowThunderbirdPath($"Thunderbird path not found, ini searched on {folder.Path}.");
+                                    mainWindow.ShowThunderbirdPath($"Thunderbird not found at the default location: {thunderbirdPath}");
                                 }
                                 m_window.Activate();
                                 return;
