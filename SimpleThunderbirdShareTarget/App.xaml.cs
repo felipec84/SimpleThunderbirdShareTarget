@@ -112,7 +112,7 @@ namespace SimpleThunderbirdShareTarget
                                 return;
                             }
 
-                            var argsList = string.Join(" ", filePaths.Select(f => $"\"{f}\""));
+                            var argsList = string.Join(",", filePaths.Select(f => $"\"{f}\""));
                             var psi = new ProcessStartInfo
                             {
                                 FileName = thunderbirdPath,
