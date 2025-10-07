@@ -1,0 +1,60 @@
+name: Build and Release
+
+# This workflow is triggered when a new tag is pushed that matches the pattern 'v*.*.*' (e.g., v1.0.0)
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest # WinUI 3 apps must be built on Windows
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v2
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Restore NuGet packages
+        run: nuget restore SimpleThunderbirdShareTarget.sln
+
+      - name: Build the application
+        run: |
+          msbuild SimpleThunderbirdShareTarget.sln /p:Configuration=Release /p:Platform=x64 /p:AppxPackageDir=".\AppxPackages\\" /p:UapAppxPackageBuildMode=Sideloading /p:AppxPackageSigningEnabled=false
+
+      - name: Get package name
+        id: package
+        run: |
+          $msixPath = (Get-ChildItem -Path ".\AppxPackages" -Filter "*.msix" -Recurse).FullName
+          $msixName = (Get-ChildItem -Path ".\AppxPackages" -Filter "*.msix" -Recurse).Name
+          echo "path=$msixPath" >> $env:GITHUB_OUTPUT
+          echo "name=$msixName" >> $env:GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: |
+            New release of Simple Thunderbird Share Target.
+            Install the attached .msix file.
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ steps.package.outputs.path }}
+          asset_name: ${{ steps.package.outputs.name }}
+          asset_content_type: application/msix
