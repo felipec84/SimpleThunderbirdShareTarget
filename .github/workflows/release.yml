@@ -9,6 +9,10 @@ on:
 jobs:
   build-and-release:
     runs-on: windows-latest # WinUI 3 apps must be built on Windows
+    permissions:
+      # Grant write permission to the contents scope
+      # This is required for creating a release and uploading assets
+      contents: write
 
     steps:
       - name: Checkout code
