@@ -70,47 +70,47 @@ namespace SimpleThunderbirdShareTarget
                             {
                                 filePaths.Add(item.Path);
                             }
-                            // Read Thunderbird path from .ini
                             var thunderbirdPath = ThunderbirdPathProvider.GetThunderbirdPath();
 
                             if (string.IsNullOrEmpty(thunderbirdPath) || !File.Exists(thunderbirdPath))
                             {
-                                m_window = new MainWindow();
-                                if (m_window is MainWindow mainWindow)
-                                {
-                                    mainWindow.ShowThunderbirdPath($"Thunderbird not found at the default location: {thunderbirdPath}");
-                                }
-                                m_window.Activate();
+                                ShowErrorWindow($"Thunderbird not found at the default location: {thunderbirdPath}");
                                 return;
                             }
 
-                            var argsList = string.Join(",", filePaths.Select(f => $"\"{f}\""));
+                            var attachments = string.Join(",", filePaths.Select(f => $"\"{f}\""));
                             var psi = new ProcessStartInfo
                             {
                                 FileName = thunderbirdPath,
-                                Arguments = $"-compose \"attachment='{argsList}'\"",
+                                Arguments = $"-compose \"attachment='{attachments}'\"",
                                 UseShellExecute = true
                             };
                             Process.Start(psi);
                         }
                         catch (Exception ex)
                         {
-                            m_window = new MainWindow();
-                            if (m_window is MainWindow mainWindow)
-                            {
-                                mainWindow.ShowSharedFileName($"Error: {ex.Message}");
-                            }
-                            m_window.Activate();
-                            return;
+                            ShowErrorWindow($"Error processing shared files: {ex.Message}");
                         }
                     }
                 }
             } else
             {
-                // Only show the window for normal launches (not share target)
-                m_window = new MainWindow();
-                m_window.Activate();
+                // This is the normal launch path.
+                // It will be triggered when the user clicks the app icon.
+                ShowErrorWindow("This app is a share target for Thunderbird. To use it, share a file and select this app.");
             }
+        }
+
+        private void ShowErrorWindow(string message)
+        {
+            // Ensure UI updates happen on the UI thread.
+            // Although OnActivated is on the UI thread, this is a good practice.
+            m_window = new MainWindow();
+            if (m_window is MainWindow mainWindow)
+            {
+                mainWindow.ShowThunderbirdPath(message);
+            }
+            m_window.Activate();
         }
     }
 }
