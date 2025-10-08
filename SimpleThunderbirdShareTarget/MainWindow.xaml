@@ -35,7 +35,7 @@
             Margin="20"/>
         <TextBlock 
             Grid.Row="2"
-            x:Name="ThunderbirdTextBlock"
+            x:Name="ErrorMessageTextBlock"
             Text="Thunderbird location..."
             FontSize="20"
             FontWeight="Bold"

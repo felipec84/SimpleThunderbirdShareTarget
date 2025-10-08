@@ -147,8 +147,21 @@ namespace SimpleThunderbirdShareTarget
             {
                 // This is the normal launch path.
                 // It will be triggered when the user clicks the app icon.
-                ShowErrorWindow("This app is a share target for Thunderbird. To use it, share a file and select this app.");
-            }
+                var thunderbirdPath = ThunderbirdPathProvider.GetThunderbirdPath();
+
+                if (string.IsNullOrEmpty(thunderbirdPath))
+                {
+                    ShowErrorWindow($"Thunderbird not found, please install via Windows Store or at the default location: " +
+                        Environment.NewLine +
+                        $"'{ThunderbirdPathProvider.GetThunderbirdTraditionalPath()}'");
+                    return;
+                } else
+                {
+                    ShowErrorWindow("This app is a share target for Thunderbird. To use it, share a file and select this app." +
+                        Environment.NewLine +
+                        $"Thunderbird executable='{thunderbirdPath}'");
+                }
+            }   
         }
 
         private void ShowErrorWindow(string message)
@@ -158,7 +171,7 @@ namespace SimpleThunderbirdShareTarget
             m_window = new MainWindow();
             if (m_window is MainWindow mainWindow)
             {
-                mainWindow.ShowThunderbirdPath(message);
+                mainWindow.ShowErrorMessage(message);
             }
             m_window.Activate();
         }

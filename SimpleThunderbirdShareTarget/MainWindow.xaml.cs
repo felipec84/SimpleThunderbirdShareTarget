@@ -37,9 +37,9 @@ namespace SimpleThunderbirdShareTarget
         {
             FileNameTextBlock.Text = $"Received File: {fileName}";
         }
-        public void ShowThunderbirdPath(string path)
+        public void ShowErrorMessage(string message)
         {
-            ThunderbirdTextBlock.Text = $"Thunderbird Path: {path}";
+            ErrorMessageTextBlock.Text = message;
         }
     }
 }
