@@ -25,14 +25,14 @@ jobs:
 
       - name: Publish the application
         run: |
-          dotnet publish SimpleThunderbirdShareTarget.sln -c Release -r win-x64 --self-contained true -p:AppxPackageDir=".\AppxPackages\\" -p:UapAppxPackageBuildMode=Sideloading -p:AppxPackageSigningEnabled=false -p:GenerateAppxPackageOnBuild=true
+          dotnet publish SimpleMailShareHelper.sln -c Release -r win-x64 --self-contained true -p:AppxPackageDir=".\AppxPackages\\" -p:UapAppxPackageBuildMode=Sideloading -p:AppxPackageSigningEnabled=false -p:GenerateAppxPackageOnBuild=true
 
       - name: Get package name
         id: package
         run: |
-          $msixFile = Get-ChildItem -Path "SimpleThunderbirdShareTarget\AppxPackages" -Filter "*.msix*" -Recurse | Select-Object -First 1
+          $msixFile = Get-ChildItem -Path "SimpleMailShareHelper\AppxPackages" -Filter "*.msix*" -Recurse | Select-Object -First 1
           if ($null -eq $msixFile) {
-            Write-Error "MSIX file not found in SimpleThunderbirdShareTarget\AppxPackages"
+            Write-Error "MSIX file not found in SimpleMailShareHelper\AppxPackages"
             exit 1
           }
           echo "Found MSIX package: $($msixFile.FullName)"

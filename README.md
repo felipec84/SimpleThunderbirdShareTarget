@@ -43,4 +43,4 @@ This project is licensed under the GNU Lesser General Public License v2.1. See t
 
 ## Contact & Support
 
-If you encounter any issues or have suggestions for improvement, please open an issue on the project's GitHub page https://github.com/felipec84/SimpleThunderbirdShareTarget.
+If you encounter any issues or have suggestions for improvement, please open an issue on the project's GitHub page https://github.com/felipec84/SimpleMailShareHelper.

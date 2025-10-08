@@ -1,9 +1,9 @@
 {
   "profiles": {
-    "SimpleThunderbirdShareTarget (Package)": {
+    "SimpleMailShareHelper (Package)": {
       "commandName": "MsixPackage"
     },
-    "SimpleThunderbirdShareTarget (Unpackaged)": {
+    "SimpleMailShareHelper (Unpackaged)": {
       "commandName": "Project"
     }
   }

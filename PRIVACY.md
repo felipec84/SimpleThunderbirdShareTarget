@@ -1,4 +1,4 @@
-# Privacy Policy for SimpleThunderbirdShareTarget
+# Privacy Policy for Simple Mail Share Helper
 
 This application does not collect, store, or transmit any personal information from its users.
 
