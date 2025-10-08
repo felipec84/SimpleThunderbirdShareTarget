@@ -15,11 +15,61 @@ namespace SimpleThunderbirdShareTarget
 {
     public static class ThunderbirdPathProvider
     {
-        private const string DefaultThunderbirdPath = @"C:\Program Files\Mozilla Thunderbird\thunderbird.exe";
+        public static string GetThunderbirdTraditionalPath()
+        {
+            string programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+            string traditionalPath = Path.Combine(programFiles, "Mozilla Thunderbird", "thunderbird.exe");
+            return traditionalPath;
+        }
 
         public static string GetThunderbirdPath()
         {
-            return DefaultThunderbirdPath;
+            const string StoreAlias = "thunderbird.exe";
+            if (CanLaunchExecutable(StoreAlias))
+            {
+                return StoreAlias;
+            }
+            string traditionalPath = GetThunderbirdTraditionalPath();
+            if (File.Exists(traditionalPath))
+            {
+                return traditionalPath;
+            }
+            return "";
+        }
+
+        public static bool CanLaunchExecutable(string executableName)
+        {
+            // If the path is already a full path, check if the file exists directly
+            if (Path.IsPathRooted(executableName) && File.Exists(executableName))
+            {
+                return true;
+            }
+
+            // 1. Get the system PATH environment variable
+            string? pathEnv = Environment.GetEnvironmentVariable("PATH");
+            if (string.IsNullOrEmpty(pathEnv))
+            {
+                return false;
+            }
+
+            // 2. Split the PATH into individual directories (Windows uses ';' as separator)
+            string[] directories = pathEnv.Split(Path.PathSeparator);
+
+            // 3. Check each directory for the executable file
+            foreach (string dir in directories)
+            {
+                // Path.Combine is crucial for handling trailing slashes correctly
+                string fullPath = Path.Combine(dir, executableName);
+
+                // Check for the file's existence
+                if (File.Exists(fullPath))
+                {
+                    return true;
+                }
+            }
+
+            // If the loop finishes without finding the file, it's not in the PATH
+            return false;
         }
     }
 
@@ -72,9 +122,9 @@ namespace SimpleThunderbirdShareTarget
                             }
                             var thunderbirdPath = ThunderbirdPathProvider.GetThunderbirdPath();
 
-                            if (string.IsNullOrEmpty(thunderbirdPath) || !File.Exists(thunderbirdPath))
+                            if (string.IsNullOrEmpty(thunderbirdPath))
                             {
-                                ShowErrorWindow($"Thunderbird not found at the default location: {thunderbirdPath}");
+                                ShowErrorWindow($"Thunderbird not found, please install via Windows Store or at the default location: {ThunderbirdPathProvider.GetThunderbirdTraditionalPath()}");
                                 return;
                             }
 
