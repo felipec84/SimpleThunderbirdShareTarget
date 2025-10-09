@@ -11,7 +11,7 @@
   <Identity
     Name="felipec84.SimpleMailShareHelper"
     Publisher="CN=34DCA0F4-4177-4548-8E69-766958714C78"
-    Version="1.0.6.0" />
+    Version="1.0.7.0" />
 
   <Properties>
     <DisplayName>Simple Mail Share Helper</DisplayName>
